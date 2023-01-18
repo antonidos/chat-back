@@ -2,6 +2,7 @@ const path = require('path');
 
 const SETTINGS = {
     HOST: 'http://localhost:8080',
+    PORT: 8080,
     DB_PATH: './application/modules/DB/db.db',
 }
 

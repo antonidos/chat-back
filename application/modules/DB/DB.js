@@ -18,7 +18,7 @@ class DB {
      * @returns {Promise} 
      */
     getUserByUsername(userName) {
-        const user = this.db.get(`SELECT * FROM users WHERE username=${userName}`);
+        const user = this.db.get(`SELECT * FROM users WHERE username=?`, [userName]);
         return user;
     }
 
@@ -48,4 +48,21 @@ class DB {
         );
         return result;
     }
+
+    /**
+     * Обновить колонку token в таблице users.
+     * 
+     * @param {number} id 
+     * @param {id} token 
+     * @returns {Promise}
+     */
+    updateUserToken(id, token) {
+        const result = this.db.run(
+            'UPDATE users SET token=? WHERE id=?',
+            [token, id]
+        );
+        return result;
+    }
 }
+
+module.exports = DB;

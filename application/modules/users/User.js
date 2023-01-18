@@ -1,14 +1,14 @@
 class User {
     constructor({ id, userName, password, token }) {
         this.id = id;
-        this.name = userName;
+        this.userName = userName;
         this.password = password;
         this.token = token;
     }
 
-    fill({ id, name, password, token}) {
+    fill({ id, userName, password, token}) {
         this.id = id;
-        this.name = userName;
+        this.userName = userName;
         this.password = password;
         this.token = token; 
     }

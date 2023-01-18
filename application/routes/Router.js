@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Answer = require('./Answer');
-const multerTaskPircture = require('../modules/multer/multerTaskPicture');
 
 /**
  * 
