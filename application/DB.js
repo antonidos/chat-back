@@ -23,10 +23,20 @@ class DB {
     }
 
     /**
+     * Получить запись из таблицы users по token.
+     * 
+     * @param {string} token 
+     * @returns {Promise}
+     */
+    getUserByToken(token) {
+        const user = this.db.get('SELECT * FROM users WHERE token=?', [token]);
+        return user;
+    }
+
+    /**
      * Добавлить запись в таблицу users.
      * 
-     * @param {string} name 
-     * @param {string} email 
+     * @param {string} userName 
      * @param {string} password 
      * @param {string} token 
      * @returns {Promise}
