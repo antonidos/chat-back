@@ -54,7 +54,7 @@ function Router({ usersManager }) {
 
     router.get('/users/get_user_data/:token', async (req, res) => {
         try {
-            const value = await users.getUserData(req.params);
+            const value = await usersManager.getUserData(req.params);
             res.json(answer.good(value));
         } catch (error) {
             console.log(error.message);
@@ -63,7 +63,17 @@ function Router({ usersManager }) {
         }
     });
 
-    
+    router.post('/users/update_user_info/', async (req, res) => {
+        try {
+            console.log(req.body)
+            const value = await usersManager.updateUserInfo(req.body);
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    });
 
     router.all('/*', (req, res) => res.send(answer.bad(404)));
     return router;

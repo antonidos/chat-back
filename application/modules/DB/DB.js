@@ -63,6 +63,14 @@ class DB {
         );
         return result;
     }
+
+    updateUserData(age, email, phone, token) {
+        const result = this.db.run(
+            'UPDATE users SET age=?, email=?, phone=? WHERE token=?',
+            [age, email, phone, token]
+        );
+        return result;
+    }
 }
 
 module.exports = DB;

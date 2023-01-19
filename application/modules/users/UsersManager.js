@@ -121,6 +121,25 @@ class UsersManager extends Module {
         }
         return Answer.getDataToTemplate(user);
     }
+
+    async updateUserInfo(data) {
+        const {age, email, phone, token} = data;
+        if (!token) {
+            Answer.getDataToTemplate(
+                false,
+                "На сервер передан пустой токен"
+            );
+        }
+        const user = await this.db.getUserByToken(token);
+        if (!user) {
+            Answer.getDataToTemplate(
+                false,
+                "Не найден пользователь в базе по токену"
+            ); 
+        }
+        const result = await this.db.updateUserData(age, email, phone, token)
+        return Answer.getDataToTemplate(true)
+    }
 }
 
 module.exports = UsersManager;
