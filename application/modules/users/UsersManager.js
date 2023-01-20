@@ -140,6 +140,12 @@ class UsersManager extends Module {
         const result = await this.db.updateUserData(age, email, phone, token)
         return Answer.getDataToTemplate(true)
     }
+
+    async searchUsers(data) {
+        const {filter} = data;
+        const result = await this.db.searchUsers(filter);
+        return Answer.getDataToTemplate(result)
+    }
 }
 
 module.exports = UsersManager;

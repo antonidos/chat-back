@@ -75,6 +75,17 @@ function Router({ usersManager }) {
         }
     });
 
+    router.get('/users/search_users/:filter', async (req, res) => {
+        try {
+            const value = await usersManager.searchUsers(req.params)
+            res.json(answer.good(value));
+        } catch {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
     router.all('/*', (req, res) => res.send(answer.bad(404)));
     return router;
 }

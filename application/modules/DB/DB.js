@@ -71,6 +71,14 @@ class DB {
         );
         return result;
     }
+
+    searchUsers(substr) {
+        const result = this.db.all(
+            'SELECT username, id FROM users WHERE instr(LOWER(username), ?) > 0',
+            [substr]
+        )
+        return result
+    }
 }
 
 module.exports = DB;
