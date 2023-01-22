@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 
 class DB {
-    constructor (dbFilePath="") {
+    constructor(dbFilePath = "") {
         (async () => {
             this.db = await open({
                 filename: dbFilePath,
@@ -102,10 +102,23 @@ class DB {
     addUserChat(token, username) {
         const result = this.db.run(
             `INSERT INTO dialogs (user1, user2) VALUES (
-                (SELECT id FROM users WHERE token=?)
-                , (SELECT id FROM users WHERE username=?)
-            )`,
+                    (SELECT id FROM users WHERE token=?)
+                    , (SELECT id FROM users WHERE username=?)
+                )`,
             [token, username]
+        )
+        return result
+    }
+
+    deleteUserChat(token, username) {
+        const result = this.db.run(
+            `DELETE FROM dialogs WHERE 
+                (user1 = (SELECT id FROM users WHERE token=?) 
+                AND user2 = (SELECT id FROM users WHERE username=?))
+                OR (user2 = (SELECT id FROM users WHERE token=?) 
+                AND user1 = (SELECT id FROM users WHERE username=?))
+            `,
+            [token, username, token, username]
         )
     }
 }
