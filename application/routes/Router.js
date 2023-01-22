@@ -97,6 +97,17 @@ function Router({ usersManager }) {
         }
     })
 
+    router.post('/dialogs/add_dialog', async(req, res) => {
+        try {
+            const value = await usersManager.addChatOfUser(req.body)
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
     router.all('/*', (req, res) => res.send(answer.bad(404)));
     return router;
 }

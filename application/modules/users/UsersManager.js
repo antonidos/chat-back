@@ -158,6 +158,18 @@ class UsersManager extends Module {
         const result = await this.db.getDialogsOfUser(token);
         return Answer.getDataToTemplate(result)
     }
+
+    async addChatOfUser(data) {
+        const {token, username} = data;
+        if (!token) {
+            Answer.getDataToTemplate(
+                false,
+                "На сервер передан пустой токен"
+            );
+        }
+        const result = await this.db.addUserChat(token, username)
+        return Answer.getDataToTemplate(result)
+    }
 }
 
 module.exports = UsersManager;

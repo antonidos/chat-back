@@ -81,14 +81,6 @@ class DB {
     }
 
     getDialogsOfUser(token) {
-        // const result = this.db.all(
-        //     `SELECT id FROM dialogs WHERE user1 = (
-        //         SELECT id FROM users WHERE token=?
-        //     ) OR user2 = (
-        //         SELECT id FROM users WHERE token=?
-        //     )`,
-        //     [token, token]
-        // )
         const result = this.db.all(
             `SELECT * FROM
                 (SELECT dialogs.id, dialogs.username1, users.username as username2 FROM 
@@ -105,6 +97,16 @@ class DB {
             [token, token]
         )
         return result;
+    }
+
+    addUserChat(token, username) {
+        const result = this.db.run(
+            `INSERT INTO dialogs (user1, user2) VALUES (
+                (SELECT id FROM users WHERE token=?)
+                , (SELECT id FROM users WHERE username=?)
+            )`,
+            [token, username]
+        )
     }
 }
 
