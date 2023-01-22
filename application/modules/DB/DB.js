@@ -79,6 +79,33 @@ class DB {
         )
         return result
     }
+
+    getDialogsOfUser(token) {
+        // const result = this.db.all(
+        //     `SELECT id FROM dialogs WHERE user1 = (
+        //         SELECT id FROM users WHERE token=?
+        //     ) OR user2 = (
+        //         SELECT id FROM users WHERE token=?
+        //     )`,
+        //     [token, token]
+        // )
+        const result = this.db.all(
+            `SELECT * FROM
+                (SELECT dialogs.id, dialogs.username1, users.username as username2 FROM 
+                    (SELECT dialogs.id, users.username as username1, dialogs.user2 FROM dialogs
+                    INNER JOIN users 
+                    ON dialogs.user1 = users.id) as dialogs
+                INNER JOIN users 
+                ON dialogs.user2 = users.id)
+            WHERE id IN (SELECT id FROM dialogs WHERE user1 = (
+                SELECT id FROM users WHERE token=?
+            ) OR user2 = (
+                SELECT id FROM users WHERE token=?
+            ))`,
+            [token, token]
+        )
+        return result;
+    }
 }
 
 module.exports = DB;

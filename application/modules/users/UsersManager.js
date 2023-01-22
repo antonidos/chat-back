@@ -146,6 +146,18 @@ class UsersManager extends Module {
         const result = await this.db.searchUsers(filter);
         return Answer.getDataToTemplate(result)
     }
+
+    async getDialogsOfUser(data) {
+        const {token} = data;
+        if (!token) {
+            Answer.getDataToTemplate(
+                false,
+                "На сервер передан пустой токен"
+            );
+        }
+        const result = await this.db.getDialogsOfUser(token);
+        return Answer.getDataToTemplate(result)
+    }
 }
 
 module.exports = UsersManager;

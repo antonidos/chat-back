@@ -79,7 +79,18 @@ function Router({ usersManager }) {
         try {
             const value = await usersManager.searchUsers(req.params)
             res.json(answer.good(value));
-        } catch {
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
+    router.get('/dialogs/get_dialogs_of_user?/:token', async (req, res) => {
+        try {
+            const value = await usersManager.getDialogsOfUser(req.params)
+            res.json(answer.good(value));
+        } catch (error) {
             console.log(error.message);
             console.log(error.stack);
             res.json(answer.bad(900));
