@@ -182,6 +182,32 @@ class UsersManager extends Module {
         const result = await this.db.deleteUserChat(token, username)
         return Answer.getDataToTemplate(result)
     }
+
+    async addMessageInChat(data) {
+        const {token, chatId, content} = data;
+        if (!token || !chatId || !content) {
+            Answer.getDataToTemplate(
+                false,
+                "Одно из значений пустое!"
+            );
+        }
+
+        const result = await this.db.addMessage(token, chatId, content)
+        return Answer.getDataToTemplate(result); 
+    }
+
+    async getChat(data) {
+        const {chatId} = data;
+        if (!chatId) {
+            Answer.getDataToTemplate(
+                false,
+                "Одно из значений пустое!"
+            );
+        }
+
+        const result = await this.db.getDialog(chatId)
+        return Answer.getDataToTemplate(result); 
+    }
 }
 
 module.exports = UsersManager;

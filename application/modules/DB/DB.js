@@ -121,6 +121,22 @@ class DB {
             [token, username, token, username]
         )
     }
+
+    addMessage(token, chatId, content) {
+        const result = this.db.run(
+            `INSERT into messages (dialog_id, sender, content) VALUES (
+                ?, (SELECT id from users WHERE token=?), ?
+            )`, [chatId, token, content]
+        )
+    }
+
+    getDialog(chatId) {
+        const result = this.db.all(
+            `SELECT sender, content FROM messages WHERE dialog_id=?`
+            ,[chatId]
+        )
+        return result;
+    }
 }
 
 module.exports = DB;

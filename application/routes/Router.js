@@ -86,7 +86,7 @@ function Router({ usersManager }) {
         }
     })
 
-    router.get('/dialogs/get_dialogs_of_user?/:token', async (req, res) => {
+    router.get('/dialogs/get_dialogs_of_user/:token', async (req, res) => {
         try {
             const value = await usersManager.getDialogsOfUser(req.params)
             res.json(answer.good(value));
@@ -111,6 +111,28 @@ function Router({ usersManager }) {
     router.post('/dialogs/delete_dialog', async(req, res) => {
         try {
             const value = await usersManager.deleteChatOfUser(req.body)
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
+    router.post('/messages/add_message', async(req, res) => {
+        try {
+            const value = await usersManager.addMessageInChat(req.body)
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
+    router.get('/messages/get_chat/:chatId', async (req, res) => {
+        try {
+            const value = await usersManager.getChat(req.params)
             res.json(answer.good(value));
         } catch (error) {
             console.log(error.message);
