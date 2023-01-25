@@ -100,12 +100,20 @@ class DB {
     }
 
     addUserChat(token, username) {
-        const result = this.db.run(
+        this.db.run(
             `INSERT INTO dialogs (user1, user2) VALUES (
                     (SELECT id FROM users WHERE token=?)
                     , (SELECT id FROM users WHERE username=?)
                 )`,
             [token, username]
+        )
+        const result = this.db.get(
+            `SELECT id FROM dialogs WHERE 
+            (user1=(SELECT id FROM users WHERE token=?) 
+            AND user2=(SELECT id FROM users WHERE username=?))
+            OR (user2=(SELECT id FROM users WHERE token=?) 
+            AND user1=(SELECT id FROM users WHERE username=?))`
+            ,[token, username, token, username]
         )
         return result
     }
@@ -122,17 +130,17 @@ class DB {
         )
     }
 
-    addMessage(token, chatId, content) {
+    addMessage(token, chatId, content, timestamp) {
         const result = this.db.run(
-            `INSERT into messages (dialog_id, sender, content) VALUES (
-                ?, (SELECT id from users WHERE token=?), ?
-            )`, [chatId, token, content]
+            `INSERT into messages (dialog_id, sender, content, timestamp) VALUES (
+                ?, (SELECT id from users WHERE token=?), ?, ?
+            )`, [chatId, token, content, timestamp]
         )
     }
 
     getDialog(chatId) {
         const result = this.db.all(
-            `SELECT sender, content FROM messages WHERE dialog_id=?`
+            `SELECT sender, content, timestamp FROM messages WHERE dialog_id=?`
             ,[chatId]
         )
         return result;

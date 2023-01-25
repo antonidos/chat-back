@@ -185,6 +185,7 @@ class UsersManager extends Module {
 
     async addMessageInChat(data) {
         const {token, chatId, content} = data;
+        const timestamp = Math.floor(Date.now()/1000)
         if (!token || !chatId || !content) {
             Answer.getDataToTemplate(
                 false,
@@ -192,7 +193,7 @@ class UsersManager extends Module {
             );
         }
 
-        const result = await this.db.addMessage(token, chatId, content)
+        const result = await this.db.addMessage(token, chatId, content, timestamp)
         return Answer.getDataToTemplate(result); 
     }
 
