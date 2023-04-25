@@ -29,7 +29,7 @@ class DB {
      * @returns {Promise}
      */
     getUserByToken(token) {
-        const user = this.db.get('SELECT * FROM users WHERE token=?', [token]);
+        const user = this.db.get('SELECT id, username, token, email, phone, age FROM users WHERE token=?', [token]);
         return user;
     }
 
@@ -41,11 +41,12 @@ class DB {
      * @param {string} token 
      * @returns {Promise}
      */
-    addNewUser(userName, password, token) {
+    addNewUser(userName, password, token, email) {
         const result = this.db.run(
-            'INSERT INTO users (username, password, token) VALUES (?, ?, ?)',
-            [userName, password, token]
+            'INSERT INTO users (username, email, password, token) VALUES (?, ?, ?, ?)',
+            [userName, email, password, token]
         );
+        this.setDefaultSettings(result.id)
         return result;
     }
 
@@ -80,11 +81,11 @@ class DB {
         return result
     }
 
-    getDialogsOfUser(token) {
-        const result = this.db.all(
+    async getDialogsOfUser(token) {
+        const result = await this.db.all(
             `SELECT * FROM
-                (SELECT dialogs.id, dialogs.username1, users.username as username2 FROM 
-                    (SELECT dialogs.id, users.username as username1, dialogs.user2 FROM dialogs
+                (SELECT dialogs.id, dialogs.username1, dialogs.user1, dialogs.user2, users.username as username2 FROM 
+                    (SELECT dialogs.id, dialogs.user1, dialogs.user2, users.username as username1, dialogs.user2 FROM dialogs
                     INNER JOIN users 
                     ON dialogs.user1 = users.id) as dialogs
                 INNER JOIN users 
@@ -96,7 +97,17 @@ class DB {
             ))`,
             [token, token]
         )
-        return result;
+
+        const dialogs = result
+            ? result.map((dialog) => ({
+                id: dialog.id,
+                username1: dialog.username1,
+                username2: dialog.username2,
+            }))
+            : [];
+        const userId = (await this.getUserByToken(token)).id;
+        const idsCompanions = result ? result.map(dialog => dialog.user1 === userId ? dialog.user2 : dialog.user1) : [];
+        return [dialogs, idsCompanions];
     }
 
     addUserChat(token, username) {
@@ -113,7 +124,7 @@ class DB {
             AND user2=(SELECT id FROM users WHERE username=?))
             OR (user2=(SELECT id FROM users WHERE token=?) 
             AND user1=(SELECT id FROM users WHERE username=?))`
-            ,[token, username, token, username]
+            , [token, username, token, username]
         )
         return result
     }
@@ -133,16 +144,135 @@ class DB {
     addMessage(token, chatId, content, timestamp) {
         const result = this.db.run(
             `INSERT into messages (dialog_id, sender, content, timestamp) VALUES (
-                ?, (SELECT id from users WHERE token=?), ?, ?
+                ?, (SELECT username from users WHERE token=?), ?, ?
             )`, [chatId, token, content, timestamp]
         )
+        return result
+    }
+
+    async updateLastMessage(dialog_id, token, content, timestamp) {
+        const result = await this.db.get(`SELECT * FROM last_messages WHERE dialog_id=?`, [dialog_id]);
+        // console.log(result)
+        if (result) {
+            this.db.run(`UPDATE last_messages set sender=(SELECT username from users 
+                WHERE token=?), content=?, timestamp=? WHERE dialog_id=?`
+                , [token, content, timestamp, dialog_id]
+            )
+            return true
+        } else {
+            this.db.run(`INSERT INTO last_messages (dialog_id, sender, content, timestamp) 
+                VALUES (?, (SELECT username from users WHERE token=?),?,?)`
+                , [dialog_id, token, content, timestamp]
+            )
+            return true
+        }
+
+    }
+
+    getLastMessages(ids) {
+        const result = this.db.all(`
+            SELECT * FROM last_messages WHERE dialog_id IN (${ids.join(',')}) 
+        `)
+        return result;
+    }
+
+    getAvatarsOfCompanions(ids) {
+        const result = this.db.all(`
+            SELECT src, username FROM users_avatars 
+            INNER JOIN users on users_avatars.user_id = users.id
+            WHERE user_id IN (${ids.join(',')}) 
+        `)
+        return result;
     }
 
     getDialog(chatId) {
         const result = this.db.all(
             `SELECT sender, content, timestamp FROM messages WHERE dialog_id=?`
-            ,[chatId]
+            , [chatId]
         )
+        return result;
+    }
+
+    setDefaultSettings(user_id) {
+        this.db.run(`
+            INSERT INTO user_settings (user_id, theme, notifications) VALUES (?, 'LIGHT', false)
+        `, [user_id])
+    }
+
+    changeUserSettings(user_id, theme, notifications) {
+        const result = this.db.run(`
+            UPDATE user_settings set theme =?, notifications=? WHERE user_id=?
+        `, [theme, notifications, user_id])
+        return result;
+    }
+
+    setTheme(user_id, theme) {
+        const result = this.db.run(`
+            UPDATE user_settings set theme=? WHERE user_id=?
+        `, [theme, user_id])
+        return result;
+    }
+
+    getUserSettings(user_id) {
+        const result = this.db.get(`SELECT * FROM user_settings WHERE user_id=?`, [user_id]);
+        return result;
+    }
+
+    async saveAvatar(userId, src, filename, guid) {
+        const isExist = await this.getAvatar(userId);
+        if (isExist) {
+            const result = this.db.run(`
+            UPDATE 
+                users_avatars
+            SET
+                src=?, file_name=?, guid=?
+            WHERE
+                user_id=?
+        `, [src, filename, guid, userId]);
+            return result;
+        } else {
+            const result = this.db.run(`
+            INSERT INTO
+                users_avatars
+                (user_id, src, file_name, guid)
+            VALUES
+                (?, ?, ?, ?)
+        `, [userId, src, filename, guid]);
+            return result;
+        }
+    }
+
+    getTaskFileByGUID(guid) {
+        const result = this.db.get(`
+            SELECT
+                *
+            FROM 
+                users_avatars
+            WHERE
+            guid = ?
+        `, [guid]);
+        return result;
+    }
+
+    getAvatar(id) {
+        const result = this.db.get(`
+            SELECT
+                *
+            FROM 
+                users_avatars
+            WHERE
+            user_id = ?
+        `, [id]);
+        return result;
+    }
+
+    removeAvatar(userId) {
+        const result = this.db.run(`
+            DELETE FROM 
+                users_avatars 
+            WHERE 
+                user_id = ?
+        `, [userId]);
         return result;
     }
 }

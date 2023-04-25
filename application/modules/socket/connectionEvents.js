@@ -7,6 +7,10 @@ module.exports = (io, socket) => {
         socket.emit('offline', chatId)
     }
 
+    const subscribeForAlerts = (token) => {
+        
+    }
+
     socket.on('join', joinChat);
     socket.on('disconnect', leaveChat)
 }

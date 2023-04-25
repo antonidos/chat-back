@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Answer = require('./Answer');
+const multerTaskPicture = require('../modules/multer/multerTaskPicture');
 
 /**
  * 
@@ -140,6 +141,83 @@ function Router({ usersManager }) {
             res.json(answer.bad(900));
         }
     })
+
+    router.post('/settings/change_user_settings', async (req, res) => {
+        try {
+            const value = await usersManager.changeSetting(req.body)
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
+    router.get('/settings/get_user_settings/:token', async (req, res) => {
+        try {
+            const value = await usersManager.getSettings(req.params)
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
+    router.post('/settings/set_theme', async (req, res) => {
+        try {
+            const value = await usersManager.setTheme(req.body)
+            res.json(answer.good(value));
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    })
+
+    router.post('/users/save_avatar', multerTaskPicture, async (req, res) => {
+        try {
+            const value = await usersManager.saveAvatar({ avatar: req.file, ...req.body });
+            res.json(answer.good(value));    
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    });
+
+    router.get('/users/remove_avatar/:token', async (req, res) => {
+        try {
+            const value = await usersManager.removeAvatar(req.params);
+            res.json(answer.good(value)); 
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    });
+
+    router.post('/users/save_avatar', multerTaskPicture, async (req, res) => {
+        try {
+            const value = await usersManager.saveAvatar({ avatar: req.file, ...req.body });
+            res.json(answer.good(value));    
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    });
+
+    router.get('/users/get_avatar/:token', async (req, res) => {
+        try {
+            const value = await usersManager.getAvatar(req.params);
+            res.json(answer.good(value)); 
+        } catch (error) {
+            console.log(error.message);
+            console.log(error.stack);
+            res.json(answer.bad(900));
+        }
+    });
 
     router.all('/*', (req, res) => res.send(answer.bad(404)));
     return router;

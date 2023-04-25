@@ -13,7 +13,7 @@ const io = new Server(server, {
       credentials: true
     }
   });
-const { HOST, PORT, DB_PATH } = SETTINGS;
+const { HOST, PORT, DB_PATH, UPLOADS } = SETTINGS;
 
 const DB = require('./application/modules/DB/DB')
 const UsersManager = require('./application/modules/users/UsersManager');
@@ -29,6 +29,8 @@ app.use(
     bodyParser.urlencoded({ extended: true }),
     express.static(__dirname + '/public')
 );
+app.use(`/${UPLOADS.FOLDER_PATH}`, express.static('uploads')); 
+
 app.use(bodyParser.json());
 app.use(cors());
 
