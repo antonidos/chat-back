@@ -105,9 +105,14 @@ class DB {
                 username2: dialog.username2,
             }))
             : [];
-        const userId = (await this.getUserByToken(token)).id;
-        const idsCompanions = result ? result.map(dialog => dialog.user1 === userId ? dialog.user2 : dialog.user1) : [];
-        return [dialogs, idsCompanions];
+        try {
+            const userId = (await this.getUserByToken(token)).id;
+            const idsCompanions = result ? result.map(dialog => dialog.user1 === userId ? dialog.user2 : dialog.user1) : [];
+            return [dialogs, idsCompanions];
+        } catch {
+            return false
+        }
+        
     }
 
     addUserChat(token, username) {

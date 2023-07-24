@@ -14,7 +14,7 @@ class UsersManager extends Module {
         const { userName, password, email } = data;
 
         if (!(userName && password && email)) {
-            const text = "Имеются пустные данные";
+            const text = "Имеются пустые данные";
             return Answer.getDataToTemplate(false, text);
         }
 
@@ -159,14 +159,21 @@ class UsersManager extends Module {
             );
         }
         const fullDataFialogs = await this.db.getDialogsOfUser(token)
-        const dialogs = fullDataFialogs[0];
-        const IDsCompanions = fullDataFialogs[1];
 
-        const IDsDialogs = dialogs.map(chat => chat.id)
-        const lastMessages = await this.db.getLastMessages(IDsDialogs);
-        const avatars = await this.db.getAvatarsOfCompanions(IDsCompanions)
-        console.log({dialogs, lastMessages, avatars})
-        return Answer.getDataToTemplate({dialogs, lastMessages, avatars})
+        if(fullDataFialogs) {
+            const dialogs = fullDataFialogs[0];
+            const IDsCompanions = fullDataFialogs[1];
+    
+            const IDsDialogs = dialogs.map(chat => chat.id)
+            const lastMessages = await this.db.getLastMessages(IDsDialogs);
+            const avatars = await this.db.getAvatarsOfCompanions(IDsCompanions)
+            console.log({dialogs, lastMessages, avatars})
+            return Answer.getDataToTemplate({dialogs, lastMessages, avatars})
+        }
+        else Answer.getDataToTemplate(
+            false,
+            "Произошла ошибка"
+        );
     }
 
     async addChatOfUser(data) {
