@@ -1,0 +1,1 @@
+To open this project install all dependencies with npm i. Then type npm start and server will listen.
